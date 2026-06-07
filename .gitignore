@@ -1,0 +1,80 @@
+# ==============================================================================
+# 1. TERRAFORM (Infrastructure)
+# ==============================================================================
+# Local .terraform directories
+**/.terraform/*
+
+# .tfstate files (CRITICAL SECURITY: State files often contain plaintext secrets)
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+
+# Ignore variables files containing local overrides or secrets
+*.tfvars
+*.tfvars.json
+# EXCEPTION: Do not ignore our example file!
+!terraform.tfvars.example
+
+# Ignore override files
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# (Note: .terraform.lock.hcl is NOT ignored. It should be committed to version control)
+
+# ==============================================================================
+# 2. PYTHON (Extractor & Cloud Run)
+# ==============================================================================
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environments
+venv/
+.venv/
+env/
+.env/
+
+# Pytest and Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# ==============================================================================
+# 3. SECRETS & GCP CREDENTIALS (CRITICAL)
+# ==============================================================================
+# Never commit GCP Service Account JSON keys!
+*.json
+# EXCEPTIONS: Allow specific safe JSON files (like Dataform or Dashboards)
+!src/dataform/dataform.json
+!monitoring/dashboards/*.json
+
+# Generic local environment variables
+.env
+.env.local
+
+# Local Dataform credentials
+.df-credentials.json
+
+# ==============================================================================
+# 4. OS & IDE FILES
+# ==============================================================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# IDEs (VS Code, IntelliJ, etc.)
+.vscode/
+.idea/
+*.swp
+*.swo
