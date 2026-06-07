@@ -59,7 +59,7 @@ gcloud storage buckets update gs://$STATE_BUCKET \
     --update-labels=environment=admin,workload=devops-hub,component=tf-state,managed-by=manual
 
 # ------------------------------------------------------------------------------
-# 4. Zero-Trust Identities (Service Accounts)
+# 4. Service Accounts
 # ------------------------------------------------------------------------------
 echo "Provisioning Environment-Bound Service Accounts..."
 
@@ -75,26 +75,22 @@ echo "Granting State Bucket Access to Service Accounts..."
 gcloud storage buckets add-iam-policy-binding gs://$STATE_BUCKET \
     --member="serviceAccount:$DEV_SA" \
     --role="roles/storage.objectAdmin" \
-    --condition=None
 
 gcloud storage buckets add-iam-policy-binding gs://$STATE_BUCKET \
     --member="serviceAccount:$PROD_SA" \
     --role="roles/storage.objectAdmin" \
-    --condition=None
 
 echo "Granting Spoke Project Access..."
 gcloud projects add-iam-policy-binding $DEV_PROJECT \
     --member="serviceAccount:$DEV_SA" \
     --role="roles/editor" \
-    --condition=None
 
 gcloud projects add-iam-policy-binding $PROD_PROJECT \
     --member="serviceAccount:$PROD_SA" \
     --role="roles/editor" \
-    --condition=None
 
 # ------------------------------------------------------------------------------
-# 5. Workload Identity Federation (WIF)
+# 5. Workload Identity Federation
 # ------------------------------------------------------------------------------
 echo "Configuring Workload Identity Federation..."
 
@@ -127,13 +123,11 @@ echo "Binding Identities to GitHub Environments..."
 gcloud iam service-accounts add-iam-policy-binding $DEV_SA \
     --role="roles/iam.workloadIdentityUser" \
     --member="principalSet://iam.googleapis.com/projects/${HUB_NUMBER}/locations/global/workloadIdentityPools/${POOL_NAME}/attribute.environment/development" \
-    --condition=None
 
 # Prod Binding
 gcloud iam service-accounts add-iam-policy-binding $PROD_SA \
     --role="roles/iam.workloadIdentityUser" \
     --member="principalSet://iam.googleapis.com/projects/${HUB_NUMBER}/locations/global/workloadIdentityPools/${POOL_NAME}/attribute.environment/production" \
-    --condition=None
 
 # ------------------------------------------------------------------------------
 # 6. Output Target Variables
