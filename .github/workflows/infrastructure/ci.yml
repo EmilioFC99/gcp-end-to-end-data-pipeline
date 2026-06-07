@@ -1,0 +1,51 @@
+name: Infrastructure CI (Plan)
+
+on:
+  pull_request:
+    paths:
+      - 'infrastructure/**'
+
+jobs:
+  terraform-plan:
+    name: 'Plan: ${{ matrix.target_folder }}'
+    runs-on: ubuntu-latest
+    
+    # Run in parallel: once for dev, once for prod
+    strategy:
+      matrix:
+        include:
+          - target_folder: dev
+            github_environment: development
+          - target_folder: prod
+            github_environment: production
+
+    # Dynamically inject the GitHub Environment to get the correct SA Token
+    environment: ${{ matrix.github_environment }} 
+    
+    permissions:
+      contents: read
+      id-token: write 
+
+    defaults:
+      run:
+        working-directory: ./infrastructure/environments/${{ matrix.target_folder }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.TF_GCP_SERVICE_ACCOUNT }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      # Initialize using the central state bucket defined in infrastructure/main.tf
+      - name: Terraform Init
+        run: terraform init -upgrade
+
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
