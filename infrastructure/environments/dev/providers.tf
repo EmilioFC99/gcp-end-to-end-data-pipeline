@@ -3,8 +3,7 @@ terraform {
   
   backend "gcs" {
     bucket = "tf-state-emilio-flores-portfolio"
-    # This prefix guarantees we only use and edit this project's infrastructure
-    prefix = "reverse-etl-pipeline/state"
+    prefix = "reverse-etl-pipeline/state/dev"
   }
 
   required_providers {
@@ -16,12 +15,11 @@ terraform {
 }
 
 provider "google" {
-  project = var.project_id
-  region  = var.region
+  project = "emilio-flores-portfolio-dev"
+  region  = "us-central1"
 
-  # These labels are enforced globally for this project
   default_labels = {
-    environment = var.environment
+    environment = "dev"
     workload    = "reverse-etl-pipeline"
     managed-by  = "terraform"
     owner       = "emilio-flores"
