@@ -96,6 +96,22 @@ gcloud projects add-iam-policy-binding $PROD_PROJECT \
     --role="roles/editor"
 
 # ------------------------------------------------------------------------------
+# 4.1 Developer Local Impersonation Bindings
+# ------------------------------------------------------------------------------
+echo "Granting Local Impersonation Rights to Developer..."
+export DEVELOPER_EMAIL="DEVELOPER_EMAIL_PLACEHOLDER"
+
+# Allow you to impersonate the Dev SA locally
+gcloud iam service-accounts add-iam-policy-binding $DEV_SA \
+    --member="user:${DEVELOPER_EMAIL}" \
+    --role="roles/iam.serviceAccountTokenCreator"
+
+# Allow you to impersonate the Prod SA locally (Read-Only/Plan access)
+gcloud iam service-accounts add-iam-policy-binding $PROD_SA \
+    --member="user:${DEVELOPER_EMAIL}" \
+    --role="roles/iam.serviceAccountTokenCreator"
+
+# ------------------------------------------------------------------------------
 # 5. Workload Identity Federation
 # ------------------------------------------------------------------------------
 echo "Configuring Workload Identity Federation..."
@@ -136,6 +152,7 @@ gcloud iam service-accounts add-iam-policy-binding $DEV_SA \
 gcloud iam service-accounts add-iam-policy-binding $PROD_SA \
     --role="roles/iam.workloadIdentityUser" \
     --member="principalSet://iam.googleapis.com/projects/${HUB_NUMBER}/locations/global/workloadIdentityPools/${POOL_NAME}/attribute.environment/production"
+
 
 # ------------------------------------------------------------------------------
 # 6. Output Target Variables
