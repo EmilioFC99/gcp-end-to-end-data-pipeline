@@ -46,11 +46,11 @@ jobs:
 
       # Initialize using the central state bucket defined in infrastructure/main.tf
       - name: Terraform Init
-        run: terraform init -upgrade
+        run: terraform init -upgrade -no-color
 
       - name: Terraform Plan
         id: plan
-        run: terraform plan -out=tfplan
+        run: terraform plan -no-color -out=tfplan
       
       # Post the plan to the PR
       - name: Update Pull Request
