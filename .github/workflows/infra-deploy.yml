@@ -1,0 +1,80 @@
+name: Infrastructure CD (Deploy)
+
+on:
+  push:
+    branches:
+      - continuous
+    paths:
+      - 'infrastructure/**'
+
+jobs:
+  # ------------------------------------------------------------------
+  # Auto-Deploy to Development
+  # ------------------------------------------------------------------
+  deploy-dev:
+    name: 'Apply: Development'
+    runs-on: ubuntu-latest
+    environment: development 
+    permissions:
+      contents: read
+      id-token: write 
+    defaults:
+      run:
+        working-directory: ./infrastructure/environments/dev
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.TF_GCP_SERVICE_ACCOUNT }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        run: terraform init -upgrade
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+
+  # ------------------------------------------------------------------
+  # Manual Gate -> Deploy to Production
+  # ------------------------------------------------------------------
+  deploy-prod:
+    name: 'Apply: Production'
+    needs: [deploy-dev] # MUST wait for Dev to finish
+    runs-on: ubuntu-latest
+    
+    # This environment MUST have "Required Reviewers" enabled in GitHub Settings
+    # The pipeline will pause here until you click "Approve"
+    environment: production 
+    
+    permissions:
+      contents: read
+      id-token: write 
+    defaults:
+      run:
+        working-directory: ./infrastructure/environments/prod
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.TF_GCP_SERVICE_ACCOUNT }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        run: terraform init -upgrade
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
