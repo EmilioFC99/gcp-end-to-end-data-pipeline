@@ -107,13 +107,15 @@ if ! gcloud iam workload-identity-pools providers describe $PROVIDER_NAME --loca
         --location="global" \
         --workload-identity-pool=$POOL_NAME \
         --issuer-uri="https://token.actions.githubusercontent.com" \
-        --attribute-mapping="google.subject=assertion.sub,attribute.actor=assertion.actor,attribute.repository=assertion.repository,attribute.environment=assertion.environment"
+        --attribute-mapping="google.subject=assertion.sub,attribute.actor=assertion.actor,attribute.repository=assertion.repository,attribute.environment=assertion.environment" \
+        --attribute-condition="assertion.repository == '${REPO_NAME}'"
 else
-    # Update existing provider to ensure attribute mapping is correct
+    # Update existing provider to ensure attribute mapping and conditions are correct
     gcloud iam workload-identity-pools providers update-oidc $PROVIDER_NAME \
         --location="global" \
         --workload-identity-pool=$POOL_NAME \
-        --attribute-mapping="google.subject=assertion.sub,attribute.actor=assertion.actor,attribute.repository=assertion.repository,attribute.environment=assertion.environment"
+        --attribute-mapping="google.subject=assertion.sub,attribute.actor=assertion.actor,attribute.repository=assertion.repository,attribute.environment=assertion.environment" \
+        --attribute-condition="assertion.repository == '${REPO_NAME}'"
 fi
 
 export HUB_NUMBER=$(gcloud projects describe $HUB_PROJECT --format='value(projectNumber)')
