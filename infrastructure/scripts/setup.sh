@@ -7,7 +7,7 @@
 # ==============================================================================
 
 # Exit immediately if a command exits with a non-zero status
-set -e
+set -eo pipefail
 
 echo "Starting Hub-and-Spoke Bootstrap..."
 
@@ -46,16 +46,20 @@ echo "Configuring Isolated State Buckets..."
 
 # Create Dev Bucket
 if ! gcloud storage buckets describe gs://$DEV_STATE_BUCKET >/dev/null 2>&1; then
-    gcloud storage buckets create gs://$DEV_STATE_BUCKET --location=us-central1 --uniform-bucket-level-access
-    gcloud storage buckets update gs://$DEV_STATE_BUCKET --versioning
-    gcloud storage buckets update gs://$DEV_STATE_BUCKET --update-labels=environment=dev,workload=devops-hub,component=terraform
+    gcloud storage buckets create gs://$DEV_STATE_BUCKET \
+        --location=us-central1 \
+        --uniform-bucket-level-access \
+        --versioning \
+        --labels=environment=dev,workload=devops-hub,component=terraform
 fi
 
 # Create Prod Bucket
 if ! gcloud storage buckets describe gs://$PROD_STATE_BUCKET >/dev/null 2>&1; then
-    gcloud storage buckets create gs://$PROD_STATE_BUCKET --location=us-central1 --uniform-bucket-level-access
-    gcloud storage buckets update gs://$PROD_STATE_BUCKET --versioning
-    gcloud storage buckets update gs://$PROD_STATE_BUCKET --update-labels=environment=prod,workload=devops-hub,component=terraform
+    gcloud storage buckets create gs://$PROD_STATE_BUCKET \
+        --location=us-central1 \
+        --uniform-bucket-level-access \
+        --versioning \
+        --labels=environment=prod,workload=devops-hub,component=terraform
 fi
 
 # ------------------------------------------------------------------------------
