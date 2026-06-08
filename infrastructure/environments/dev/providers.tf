@@ -3,7 +3,7 @@ terraform {
   
   backend "gcs" {
     bucket = "tf-state-emilio-flores-dev"
-    prefix = "reverse-etl-pipeline/state/dev"
+    prefix = "reverse-etl-pipeline/state"
   }
 
   required_providers {
