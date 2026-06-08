@@ -1,5 +1,5 @@
 resource "google_storage_bucket" "raw_zone" {
-  name          = "reverse-etl-raw-${var.environment}"
+  name          = "reverse-etl-raw-${var.environment}-${var.project_id}"
   location      = "us-central1"
   project       = var.project_id
   
