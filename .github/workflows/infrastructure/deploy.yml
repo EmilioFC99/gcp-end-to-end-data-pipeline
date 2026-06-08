@@ -3,7 +3,7 @@ name: Infrastructure CD (Deploy)
 on:
   push:
     branches:
-      - main
+      - continuous
     paths:
       - 'infrastructure/**'
 
