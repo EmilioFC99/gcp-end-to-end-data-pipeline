@@ -49,35 +49,36 @@ jobs:
         run: terraform init -upgrade
 
       - name: Terraform Plan
+        id: plan
         run: terraform plan -out=tfplan
       
       # Post the plan to the PR
       - name: Update Pull Request
-      uses: actions/github-script@v7
-      if: github.event_name == 'pull_request'
-      env:
-        PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        script: |
-          const output = `#### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
-          
-          <details><summary>Show Plan</summary>
-          
-          \`\`\`\n
-          ${process.env.PLAN}
-          \`\`\`
-          
-          </details>
-          
-          *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
-          
-          github.rest.issues.createComment({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: output
-          })
+        uses: actions/github-script@v7
+        if: github.event_name == 'pull_request'
+        env:
+          PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const output = `#### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+            
+            <details><summary>Show Plan</summary>
+            
+            \`\`\`\n
+            ${process.env.PLAN}
+            \`\`\`
+            
+            </details>
+            
+            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
 
       # Fail the job if the plan actually failed
       - name: Terraform Plan Status
