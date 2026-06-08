@@ -55,9 +55,9 @@ jobs:
       # Post the plan to the PR
       - name: Update Pull Request
         uses: actions/github-script@v7
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && always()
         env:
-          PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
+          PLAN: "terraform\n${{ steps.plan.outputs.stdout || steps.plan.outputs.stderr }}"
           TARGET_FOLDER: ${{ matrix.target_folder }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
