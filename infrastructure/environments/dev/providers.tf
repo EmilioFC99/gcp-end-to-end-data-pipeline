@@ -22,6 +22,5 @@ provider "google" {
     environment = "dev"
     workload    = "reverse-etl-pipeline"
     managed-by  = "terraform"
-    owner       = "emilio-flores"
   }
 }
