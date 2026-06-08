@@ -22,7 +22,8 @@ export PROD_PROJECT="emilio-flores-portfolio-prod"
 export REPO_NAME="EmilioFC99/gcp-end-to-end-data-pipeline"
 export POOL_NAME="github-actions-pool"
 export PROVIDER_NAME="github-provider"
-export STATE_BUCKET="tf-state-emilio-flores-portfolio"
+export DEV_STATE_BUCKET="tf-state-emilio-flores-dev"
+export PROD_STATE_BUCKET="tf-state-emilio-flores-prod"
 
 export DEV_SA_NAME="tf-dev-sa"
 export PROD_SA_NAME="tf-prod-sa"
@@ -39,24 +40,23 @@ echo "Enabling IAM Credentials and STS APIs..."
 gcloud services enable iamcredentials.googleapis.com sts.googleapis.com
 
 # ------------------------------------------------------------------------------
-# 3. Central Terraform State Bucket
+# 3. Isolated Terraform State Buckets
 # ------------------------------------------------------------------------------
-echo "Configuring Central State Bucket: gs://${STATE_BUCKET}..."
-# Check if bucket exists, create if it doesn't
-if ! gcloud storage buckets describe gs://$STATE_BUCKET >/dev/null 2>&1; then
-    gcloud storage buckets create gs://$STATE_BUCKET \
-        --location=us-central1 \
-        --uniform-bucket-level-access
-else
-    echo "Bucket gs://${STATE_BUCKET} already exists. Skipping creation."
+echo "Configuring Isolated State Buckets..."
+
+# Create Dev Bucket
+if ! gcloud storage buckets describe gs://$DEV_STATE_BUCKET >/dev/null 2>&1; then
+    gcloud storage buckets create gs://$DEV_STATE_BUCKET --location=us-central1 --uniform-bucket-level-access
+    gcloud storage buckets update gs://$DEV_STATE_BUCKET --versioning
+    gcloud storage buckets update gs://$DEV_STATE_BUCKET --update-labels=environment=dev,workload=devops-hub,component=terraform
 fi
 
-# Enforce Object Versioning
-gcloud storage buckets update gs://$STATE_BUCKET --versioning
-
-# Apply standard DataOps cost-tracking labels
-gcloud storage buckets update gs://$STATE_BUCKET \
-    --update-labels=environment=admin,workload=devops-hub,component=tf-state,managed-by=manual
+# Create Prod Bucket
+if ! gcloud storage buckets describe gs://$PROD_STATE_BUCKET >/dev/null 2>&1; then
+    gcloud storage buckets create gs://$PROD_STATE_BUCKET --location=us-central1 --uniform-bucket-level-access
+    gcloud storage buckets update gs://$PROD_STATE_BUCKET --versioning
+    gcloud storage buckets update gs://$PROD_STATE_BUCKET --update-labels=environment=prod,workload=devops-hub,component=terraform
+fi
 
 # ------------------------------------------------------------------------------
 # 4. Service Accounts
@@ -71,12 +71,14 @@ if ! gcloud iam service-accounts describe $PROD_SA >/dev/null 2>&1; then
     gcloud iam service-accounts create $PROD_SA_NAME --display-name="Terraform Prod Environment SA"
 fi
 
-echo "Granting State Bucket Access to Service Accounts..."
-gcloud storage buckets add-iam-policy-binding gs://$STATE_BUCKET \
+echo "Granting State Bucket Access..."
+# Dev SA only gets access to Dev Bucket
+gcloud storage buckets add-iam-policy-binding gs://$DEV_STATE_BUCKET \
     --member="serviceAccount:$DEV_SA" \
     --role="roles/storage.objectAdmin"
 
-gcloud storage buckets add-iam-policy-binding gs://$STATE_BUCKET \
+# Prod SA only gets access to Prod Bucket
+gcloud storage buckets add-iam-policy-binding gs://$PROD_STATE_BUCKET \
     --member="serviceAccount:$PROD_SA" \
     --role="roles/storage.objectAdmin"
 

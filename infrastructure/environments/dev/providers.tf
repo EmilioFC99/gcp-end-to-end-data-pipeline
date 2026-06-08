@@ -2,7 +2,7 @@ terraform {
   required_version = ">= 1.5.0"
   
   backend "gcs" {
-    bucket = "tf-state-emilio-flores-portfolio"
+    bucket = "tf-state-emilio-flores-dev"
     prefix = "reverse-etl-pipeline/state/dev"
   }
 

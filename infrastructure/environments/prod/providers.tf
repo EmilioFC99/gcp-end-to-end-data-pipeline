@@ -2,8 +2,8 @@ terraform {
   required_version = ">= 1.5.0"
   
   backend "gcs" {
-    bucket = "tf-state-emilio-flores-portfolio"
-    prefix = "reverse-etl-pipeline/state/prod" # CRITICAL: Prod State Isolation
+    bucket = "tf-state-emilio-flores-prod"
+    prefix = "reverse-etl-pipeline/state" 
   }
 
   required_providers {
