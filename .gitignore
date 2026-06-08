@@ -53,7 +53,8 @@ build/
 # 3. SECRETS & GCP CREDENTIALS (CRITICAL)
 # ==============================================================================
 # Never commit GCP Service Account JSON keys!
-*.json
+*credentials.json
+*key.json
 # EXCEPTIONS: Allow specific safe JSON files (like Dataform or Dashboards)
 !src/dataform/dataform.json
 !monitoring/dashboards/*.json
