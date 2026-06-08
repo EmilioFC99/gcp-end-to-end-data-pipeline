@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'infrastructure/**'
+      - '.github/workflows/infra-ci.yml'
 
 jobs:
   terraform-plan:
