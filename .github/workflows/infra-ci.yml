@@ -58,10 +58,11 @@ jobs:
         if: github.event_name == 'pull_request'
         env:
           PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
+          TARGET_FOLDER: ${{ matrix.target_folder }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const output = `#### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+            const output = `#### Terraform Plan [${process.env.TARGET_FOLDER.toUpperCase()}] 📖\`${{ steps.plan.outcome }}\`
             
             <details><summary>Show Plan</summary>
             
@@ -71,7 +72,7 @@ jobs:
             
             </details>
             
-            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Environment: \`${process.env.TARGET_FOLDER}\`*`;
             
             github.rest.issues.createComment({
               issue_number: context.issue.number,
